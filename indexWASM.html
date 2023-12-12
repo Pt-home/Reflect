@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Reflect Filter</title>
+  <style>
+   body { 
+     background-color: #474747; 
+     user-select: none; 
+     margin: 0; 
+     padding: 0; }
+    body, input, select, label { 
+      font-family: "Open Sans", Sans-Serif; 
+      font-size: 12px; 
+      color: #d5d5d5; 
+      vertical-align: top; 
+      overflow: hidden; 
+    }
+    label { 
+      line-height:21px; 
+      display: block; 
+      margin: 2px 4px 0 0;
+      width:4em;
+    }
+    .form-group, .form-group-param {
+      text-align:center;
+    }
+    .form-group-param label { 
+      display: inline-block; 
+      width: 5em;
+      text-align: right;
+    }
+    input { 
+      background-color: #252525; 
+      border: 1px solid #252525; 
+      border-radius: 3px; 
+      transition: border 0.5s; 
+      padding: 3px; 
+      box-sizing: border-box; 
+      margin: 2px 2px;
+      width: 4em;
+    }
+
+    select { 
+      background-color: #252525; 
+      border: 1px solid #252525; 
+      border-radius: 3px; 
+      transition: border 0.5s; 
+      padding: 3px; 
+      box-sizing: border-box; 
+      margin: 2px 2px;
+      width: 10em;
+    }
+     
+    input:not(.button):hover, select:hover, input:not(.button):focus, select:focus 
+    { border: 1px solid #3482f6; 
+     outline: none !important; 
+    }
+    .button { 
+      background-color: #606060; 
+      margin: 8px 0 0 1.5px; 
+      border-radius: 3px; 
+      border-top-width: 1px; 
+      border-top-color: rgba(255,255,255,0.15); 
+      border-bottom-width: 1px;
+      border-bottom-color: rgba(0,0,0,0.6);
+      border-left: 0px; 
+      border-right: 0px;
+      padding: 8px;
+      font-size: 13px; 
+      width:18em;
+      text-overflow: ellipsis; 
+      cursor: pointer;
+    }
+    .button:hover { 
+      background-color: #6a6a6a;
+    }
+    .buttonPreset {
+      width:11em;
+    }
+    .page {
+      padding: 6px;
+      margin: 0px auto;
+    }
+    .page > div {
+      margin-bottom: 6px;
+    }
+    h3 {
+      text-align:center;
+      line-height: 0;
+    }
+    .typeValue {
+      width: 14em;
+    }
+       
+  </style>
+  
+  <script src="image-processor.js"></script>
+  
+  <script>
+    var wasm;
+    
+    Module.onRuntimeInitialized = async () => {
+      // WASM from image-processor.js initialized
+      wasm = {
+              alloc: Module.cwrap("wasmAlloc", "number", ["number", "number"]),
+              free: Module.cwrap("wasmFree", "void", ["number"]),
+              process: Module.cwrap("wasmProcess", "void", ["number", "number", "number", "number", 
+                                                            "number", "number", "number", "string"]),
+            };
+      
+      document.getElementById("applyNF").style.visibility = "visible";
+      document.getElementById("applySL").style.visibility = "visible";
+    }
+  </script>
+</head>
+<body>
+    <div id="page" class="page">
+    <h3>Reflect Filter</h3>      
+      
+    <form id="RF">
+
+      <div class="form-group-param">
+        <label for="typeValue">Filter:</label>
+        <select name="typeValue" class="typeValue" id="typeValue"
+          onchange="interfaceRF();">
+          <option value="L2R">Left to Right</option>
+          <option value="R2L">Right to Left</option> 
+          <option value="T2B">Top to Bottom</option> 
+          <option value="B2T">Bottom to Top</option>   
+          <option value="Q1">First Quarter</option>
+          <option value="Q2">Second Quarter</option> 
+          <option value="Q3">Third Quarter</option> 
+          <option value="Q4">Fourth Quarter</option>
+          <option value="LT2RB">Left Top to Right Bottom</option>
+          <option value="RB2LT">Right Bottom to Left Top</option> 
+          <option value="LB2RT">Left Bottom to Right Top</option> 
+          <option value="RT2LB">Right Top to Left Bottom</option>
+          
+        </select>
+      </div>
+
+      <script>
+
+        function interfaceRF(){
+          var type = document.getElementById("typeValue").value;
+
+          if (type == "L2R" || type == "R2L" ){
+            document.getElementById("H").style.display   = "block";
+            document.getElementById("V").style.display   = "none"; 
+            document.getElementById("D").style.display   = "none";    
+          } else if (type == "T2B" || type == "B2T" ){
+            document.getElementById("H").style.display   = "none";
+            document.getElementById("V").style.display   = "block"; 
+            document.getElementById("D").style.display   = "none";    
+          } else if (type == "Q1" || type == "Q2" || type == "Q3" || type == "Q4"){
+            document.getElementById("H").style.display   = "block";
+            document.getElementById("V").style.display   = "block"; 
+            document.getElementById("D").style.display   = "none";    
+          } else {
+            document.getElementById("H").style.display   = "none";
+            document.getElementById("V").style.display   = "none"; 
+            document.getElementById("D").style.display   = "block";    
+          }
+        }
+      </script>     
+      
+      <div class="form-group-param" id="H">
+        <br>
+        <label for="hValue">Horizontal:</label>
+        <input type="number" id="hValue" name="hValue" value="50" step="1" min="0" max="100" required>        
+      </div>
+
+      <div class="form-group-param" id="V" style="display: none;">
+        <br>
+        <label for="vValue">Vertical:</label>
+        <input type="number" id="vValue" name="vValue" value="50" step="1" min="0" max="100" required>        
+      </div>
+
+      <div class="form-group-param" id="D" style="display: none;">
+        <br>
+        <label for="dValue">Diagonal:</label>
+        <input type="number" id="dValue" name="dValue" value="50" step="1" min="0" max="100" required>        
+      </div>      
+      
+    </form>
+      
+     <div class="form-group">
+       <br>
+       <input type="button" value="Apply Filter (New File)" id="applyNF" style="visibility: hidden"
+              onclick="applyRF(false);" class="button"/>
+     </div>
+     <div class="form-group">
+       <input type="button" value="Apply Filter (New Smart Layer)" id="applySL" style="visibility: hidden"
+              onclick="applyRF(true);" class="button"/>
+     </div>
+
+    <div class="form-group">
+       <p id="indi">Runtime (ms): <span id="runtime">0</span> </p> 
+       <p id="working">Working...</p> 
+     </div>
+
+    <div class="form-group-param">
+        <p><br><a href="index.html" style="color:white;">Go to scripts version</a></p>
+     </div>
+    
+  </div>
+
+  <script>
+    
+  var _running = false, _buffer = null;
+  var smartObject = null;
+    
+  var indi = document.getElementById("indi");
+  indi.style.visibility = "hidden";
+  var working = document.getElementById("working");
+  working.style.visibility = "hidden";
+  var runTime = document.getElementById("runtime");
+   
+  window.addEventListener("message", onMessage); 
+    
+  function onMessage(e) {
+      if (_running && e.data instanceof ArrayBuffer){
+          _buffer = e.data;
+          RF();
+      } else if (_running && e.data == "done") {
+          _running = false; _buffer = null;
+      } 
+  }
+
+  function applyRF(flag){
+     _running = true;
+     smartObject = flag;
+     window.parent.postMessage("app.activeDocument.saveToOE('png');", "*");
+     indi.style.visibility = "hidden";
+     working.style.visibility = "visible";
+  }
+
+  function RF(){
+    
+    // Создаем временный canvas
+    var tempCanvas = document.createElement('canvas');
+    var tempContext = tempCanvas.getContext('2d');
+    var blob = new Blob([_buffer], { type: 'image/png' });
+
+    function loadImageAndProcess(blob) {
+       return new Promise(function(resolve, reject) {
+          var url = URL.createObjectURL(blob);
+          var image = new Image();
+          image.src = url;
+    
+          image.onload = function() {
+            // Изображение успешно загружено
+            resolve(image);
+           };
+    
+            image.onerror = function() {
+              // Произошла ошибка загрузки изображения
+                reject(new Error('Ошибка загрузки изображения'));
+            };
+        });
+    }
+      
+    loadImageAndProcess(blob)
+      .then(function(image) {
+        var startTime = new Date();
+
+         //Read parameters
+        var form = document.getElementById("RF");
+
+        var typeRF          = form.elements.typeValue.value;         
+        var hh              = Number(form.elements.hValue.value);
+        var vv              = Number(form.elements.vValue.value);
+        var dd              = Number(form.elements.dValue.value);
+        
+
+        tempCanvas.width = image.width;
+        tempCanvas.height = image.height;
+        tempContext.drawImage(image, 0, 0);
+        var imageData = tempContext.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+        //console.log(imageData);
+        
+        //Start working=========================================================  
+
+        // Allocate a buffer for the pixels in WASM.
+        var wasmBufferPtr = wasm.alloc(image.width, image.height);
+          
+        // Copy the image pixels into the buffer.
+        Module.HEAPU8.set(imageData.data, wasmBufferPtr);
+          
+        // Process the image in WASM.
+        //wasm.process(imageData.width, imageData.height, wasmBufferPtr);
+        console.log(hh, vv, dd, typeRF);
+        wasm.process(wasmBufferPtr, image.width * image.height * 4, image.width, image.height, hh, vv, dd, typeRF);
+          
+        // Draw the image back to the canvas.
+        var outputImage = new ImageData(
+              new Uint8ClampedArray(Module.HEAPU8.buffer, wasmBufferPtr, image.width * image.height * 4),
+              image.width,
+              image.height
+        );
+       
+        function putImageDataPromise(tempContext, outputImage, wasmBufferPtr) {
+            return new Promise(function(resolve, reject) {
+              
+              tempContext.putImageData(outputImage, 0, 0);
+              // Free the buffer we allocated for the image pixels.
+              wasm.free(wasmBufferPtr);
+              
+              resolve();
+              });
+        }
+  
+        putImageDataPromise(tempContext, outputImage, wasmBufferPtr)
+          .then(function() {  
+       
+            window.parent.postMessage("app.open('" + tempCanvas.toDataURL('image/png') + "',null," + smartObject + ");", "*");
+            const endTime = new Date();
+            const duration = endTime - startTime;
+  
+            runTime.innerHTML = duration;
+            working.style.visibility = "hidden";
+            indi.style.visibility = "visible";          
+          })
+          .catch(function(error) {
+            console.error('Error:', error);
+          });
+        
+    })
+      .catch(function(error) {
+        console.error(error);
+    });
+      
+  }
+  </script>  
+</body>
+</html>

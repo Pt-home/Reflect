@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Reflect Filter</title>
+  <style>
+   body { 
+     background-color: #474747; 
+     user-select: none; 
+     margin: 0; 
+     padding: 0; }
+    body, input, select, label { 
+      font-family: "Open Sans", Sans-Serif; 
+      font-size: 12px; 
+      color: #d5d5d5; 
+      vertical-align: top; 
+      overflow: hidden; 
+    }
+    label { 
+      line-height:21px; 
+      display: block; 
+      margin: 2px 4px 0 0;
+      width:4em;
+    }
+    .form-group, .form-group-param {
+      text-align:center;
+    }
+    .form-group-param label { 
+      display: inline-block; 
+      width: 5em;
+      text-align: right;
+    }
+    input { 
+      background-color: #252525; 
+      border: 1px solid #252525; 
+      border-radius: 3px; 
+      transition: border 0.5s; 
+      padding: 3px; 
+      box-sizing: border-box; 
+      margin: 2px 2px;
+      width: 4em;
+    }
+
+    select { 
+      background-color: #252525; 
+      border: 1px solid #252525; 
+      border-radius: 3px; 
+      transition: border 0.5s; 
+      padding: 3px; 
+      box-sizing: border-box; 
+      margin: 2px 2px;
+      width: 10em;
+    }
+     
+    input:not(.button):hover, select:hover, input:not(.button):focus, select:focus 
+    { border: 1px solid #3482f6; 
+     outline: none !important; 
+    }
+    .button { 
+      background-color: #606060; 
+      margin: 8px 0 0 1.5px; 
+      border-radius: 3px; 
+      border-top-width: 1px; 
+      border-top-color: rgba(255,255,255,0.15); 
+      border-bottom-width: 1px;
+      border-bottom-color: rgba(0,0,0,0.6);
+      border-left: 0px; 
+      border-right: 0px;
+      padding: 8px;
+      font-size: 13px; 
+      width:18em;
+      text-overflow: ellipsis; 
+      cursor: pointer;
+    }
+    .button:hover { 
+      background-color: #6a6a6a;
+    }
+    .buttonPreset {
+      width:11em;
+    }
+    .page {
+      padding: 6px;
+      margin: 0px auto;
+    }
+    .page > div {
+      margin-bottom: 6px;
+    }
+    h3 {
+      text-align:center;
+      line-height: 0;
+    }
+    .typeValue {
+      width: 14em;
+    }
+       
+  </style>
+  
+</head>
+<body>
+    <div id="page" class="page">
+    <h3>Reflect Filter</h3>      
+      
+    <form id="RF">
+
+     <div class="form-group-param">
+        <label for="typeValue">Filter:</label>
+        <select name="typeValue" class="typeValue" id="typeValue"
+          onchange="interfaceRF();">
+          <option value="L2R">Left to Right</option>
+          <option value="R2L">Right to Left</option> 
+          <option value="T2B">Top to Bottom</option> 
+          <option value="B2T">Bottom to Top</option>   
+          <option value="Q1">First Quarter</option>
+          <option value="Q2">Second Quarter</option> 
+          <option value="Q3">Third Quarter</option> 
+          <option value="Q4">Fourth Quarter</option>
+          <option value="LT2RB">Left Top to Right Bottom</option>
+          <option value="RB2LT">Right Bottom to Left Top</option> 
+          <option value="LB2RT">Left Bottom to Right Top</option> 
+          <option value="RT2LB">Right Top to Left Bottom</option>
+          
+        </select>
+      </div>
+
+      <script>
+
+        function interfaceRF(){
+          var type = document.getElementById("typeValue").value;
+
+          if (type == "L2R" || type == "R2L" ){
+            document.getElementById("H").style.display   = "block";
+            document.getElementById("V").style.display   = "none"; 
+            document.getElementById("D").style.display   = "none";    
+          } else if (type == "T2B" || type == "B2T" ){
+            document.getElementById("H").style.display   = "none";
+            document.getElementById("V").style.display   = "block"; 
+            document.getElementById("D").style.display   = "none";    
+          } else if (type == "Q1" || type == "Q2" || type == "Q3" || type == "Q4"){
+            document.getElementById("H").style.display   = "block";
+            document.getElementById("V").style.display   = "block"; 
+            document.getElementById("D").style.display   = "none";    
+          } else {
+            document.getElementById("H").style.display   = "none";
+            document.getElementById("V").style.display   = "none"; 
+            document.getElementById("D").style.display   = "block";    
+          }
+        }
+      </script>     
+      
+      <div class="form-group-param" id="H">
+        <br>
+        <label for="hValue">Horizontal:</label>
+        <input type="number" id="hValue" name="hValue" value="50" step="1" min="0" max="100" required>        
+      </div>
+
+      <div class="form-group-param" id="V" style="display: none;">
+        <br>
+        <label for="vValue">Vertical:</label>
+        <input type="number" id="vValue" name="vValue" value="50" step="1" min="0" max="100" required>        
+      </div>
+
+      <div class="form-group-param" id="D" style="display: none;">
+        <br>
+        <label for="dValue">Diagonal:</label>
+        <input type="number" id="dValue" name="dValue" value="50" step="1" min="0" max="100" required>        
+      </div>      
+      
+    </form>
+      
+     <div class="form-group">
+       <br>
+       <input type="button" value="Apply Filter (New Layer)" id="applySL" 
+              onclick="applyRF();" class="button"/>
+     </div>
+
+    <div class="form-group">
+       <p id="indi"    style="visibility: hidden;">Runtime (ms): <span id="runtime">0</span> </p> 
+       <p id="working" style="visibility: hidden;">Working...</p> 
+     </div>
+
+     <div class="form-group-param">
+        <p><br><a href="indexWASM.html" style="color:white;">Go to WASM version</a></p>
+     </div>
+    
+  </div>
+
+  <script>    
+  
+  function left2right(hh) {
+    return `
+      var activeLayer = app.activeDocument.activeLayer;
+      var duplicateLayer = activeLayer.duplicate();
+      duplicateLayer.name = "Down";
+      duplicateLayer.rasterize(RasterizeType.ENTIRELAYER);
+      var downCopyLayer = duplicateLayer.duplicate();
+      downCopyLayer.name = "Up";
+      var upLayer = app.activeDocument.layers.getByName("Up");
+      var downLayer = app.activeDocument.layers.getByName("Down");
+      
+      app.activeDocument.activeLayer = upLayer;
+      var idFlip = charIDToTypeID( "flip" );
+          var descFlip = new ActionDescriptor();
+          var idnull = charIDToTypeID( "null" );
+              var refFlip = new ActionReference();
+              var idLyr = charIDToTypeID( "Lyr " );
+              var idOrdn = charIDToTypeID( "Ordn" );
+              var idTrgt = charIDToTypeID( "Trgt" );
+              refFlip.putEnumerated( idLyr, idOrdn, idTrgt );
+          descFlip.putReference( idnull, refFlip );
+          var idAxis = charIDToTypeID( "Axis" );
+          var idOrnt = charIDToTypeID( "Ornt" );
+          var idHrzn = charIDToTypeID( "Hrzn" );
+          descFlip.putEnumerated( idAxis, idOrnt, idHrzn );
+      executeAction( idFlip, descFlip, DialogModes.NO );
+      
+      var imageWidth = app.activeDocument.width;
+      var imageHeight = app.activeDocument.height;
+            
+      if (${hh} <= 50){
+          var verticalLine = Math.round(imageWidth * ${hh} / 100); 
+          var selectionBounds = [
+            [0, 0],
+            [verticalLine, 0],
+            [verticalLine, imageHeight],
+            [0, imageHeight]
+          ];
+          app.activeDocument.selection.select(selectionBounds);
+          app.activeDocument.selection.clear();
+          app.activeDocument.selection.deselect();
+          app.activeDocument.activeLayer = downLayer;
+          var shift = verticalLine - Math.round(imageWidth/2);
+          app.activeDocument.activeLayer.translate(2*shift, 0);
+      }
+      
+      if (${hh} > 50){
+        var verticalLine = Math.round(imageWidth * (100 - ${hh}) / 100); 
+          var selectionBounds = [
+            [0, 0],
+            [verticalLine, 0],
+            [verticalLine, imageHeight],
+            [0, imageHeight]
+          ];
+          app.activeDocument.selection.select(selectionBounds);
+          app.activeDocument.selection.clear();
+          app.activeDocument.selection.deselect();
+          var shift = Math.round(imageWidth/2) - verticalLine;
+          app.activeDocument.activeLayer.translate(2*shift, 0);
+      }
+      
+      app.activeDocument.activeLayer = upLayer;
+      upLayer.merge(downLayer);
+      
+      var bounds = [0, 0, imageWidth, imageHeight];
+      app.activeDocument.crop(bounds);
+      
+      var resultLayer = app.activeDocument.activeLayer;
+      resultLayer.name = "Reflect_L2R";
+      `;
+  }
+
+  function right2left(hh) {
+    return `
+      var activeLayer = app.activeDocument.activeLayer;
+      var duplicateLayer = activeLayer.duplicate();
+      duplicateLayer.name = "Down";
+      duplicateLayer.rasterize(RasterizeType.ENTIRELAYER);
+      var downCopyLayer = duplicateLayer.duplicate();
+      downCopyLayer.name = "Up";
+      var upLayer = app.activeDocument.layers.getByName("Up");
+      var downLayer = app.activeDocument.layers.getByName("Down");
+      
+      app.activeDocument.activeLayer = upLayer;
+      var idFlip = charIDToTypeID( "flip" );
+          var descFlip = new ActionDescriptor();
+          var idnull = charIDToTypeID( "null" );
+              var refFlip = new ActionReference();
+              var idLyr = charIDToTypeID( "Lyr " );
+              var idOrdn = charIDToTypeID( "Ordn" );
+              var idTrgt = charIDToTypeID( "Trgt" );
+              refFlip.putEnumerated( idLyr, idOrdn, idTrgt );
+          descFlip.putReference( idnull, refFlip );
+          var idAxis = charIDToTypeID( "Axis" );
+          var idOrnt = charIDToTypeID( "Ornt" );
+          var idHrzn = charIDToTypeID( "Hrzn" );
+          descFlip.putEnumerated( idAxis, idOrnt, idHrzn );
+      executeAction( idFlip, descFlip, DialogModes.NO );
+      
+      var imageWidth = app.activeDocument.width;
+      var imageHeight = app.activeDocument.height;
+            
+      if (${hh} > 50){
+          var verticalLine = Math.round(imageWidth * ${hh} / 100); 
+          var selectionBounds = [
+            [imageWidth, 0],
+            [verticalLine, 0],
+            [verticalLine, imageHeight],
+            [imageWidth, imageHeight]
+          ];
+          app.activeDocument.selection.select(selectionBounds);
+          app.activeDocument.selection.clear();
+          app.activeDocument.selection.deselect();
+          app.activeDocument.activeLayer = downLayer;
+          var shift = verticalLine - Math.round(imageWidth/2);
+          app.activeDocument.activeLayer.translate(2*shift, 0);
+      }
+      
+      if (${hh} <= 50){
+        var verticalLine = Math.round(imageWidth * (100 - ${hh}) / 100); 
+          var selectionBounds = [
+            [imageWidth, 0],
+            [verticalLine, 0],
+            [verticalLine, imageHeight],
+            [imageWidth, imageHeight]
+          ];
+          app.activeDocument.selection.select(selectionBounds);
+          app.activeDocument.selection.clear();
+          app.activeDocument.selection.deselect();
+          var shift = Math.round(imageWidth/2) - verticalLine;
+          app.activeDocument.activeLayer.translate(2*shift, 0);
+      }
+      
+      app.activeDocument.activeLayer = upLayer;
+      upLayer.merge(downLayer);
+
+      var bounds = [0, 0, imageWidth, imageHeight];
+      app.activeDocument.crop(bounds);
+      
+      var resultLayer = app.activeDocument.activeLayer;
+      resultLayer.name = "Reflect_R2L";  
+      `;
+  }
+
+  function top2bottom(vv) {
+    return `
+      var activeLayer = app.activeDocument.activeLayer;
+      var duplicateLayer = activeLayer.duplicate();
+      duplicateLayer.name = "Down";
+      duplicateLayer.rasterize(RasterizeType.ENTIRELAYER);
+      var downCopyLayer = duplicateLayer.duplicate();
+      downCopyLayer.name = "Up";
+      var upLayer = app.activeDocument.layers.getByName("Up");
+      var downLayer = app.activeDocument.layers.getByName("Down");
+      
+      app.activeDocument.activeLayer = upLayer;
+      var idFlip = charIDToTypeID( "flip" );
+          var descFlip = new ActionDescriptor();
+          var idnull = charIDToTypeID( "null" );
+              var refFlip = new ActionReference();
+              var idLyr = charIDToTypeID( "Lyr " );
+              var idOrdn = charIDToTypeID( "Ordn" );
+              var idTrgt = charIDToTypeID( "Trgt" );
+              refFlip.putEnumerated( idLyr, idOrdn, idTrgt );
+          descFlip.putReference( idnull, refFlip );
+          var idAxis = charIDToTypeID( "Axis" );
+          var idOrnt = charIDToTypeID( "Ornt" );
+          var idVrtc = charIDToTypeID( "Vrtc" );
+          descFlip.putEnumerated( idAxis, idOrnt, idVrtc );
+      executeAction( idFlip, descFlip, DialogModes.NO );
+      
+      var imageWidth = app.activeDocument.width;
+      var imageHeight = app.activeDocument.height;
+            
+      if (${vv} <= 50){
+          var horizontalLine = Math.round(imageHeight * ${vv} / 100); 
+          var selectionBounds = [
+            [0, 0],
+            [0, horizontalLine],
+            [imageWidth,  horizontalLine],
+            [imageWidth, 0]
+          ];
+          app.activeDocument.selection.select(selectionBounds);
+          app.activeDocument.selection.clear();
+          app.activeDocument.selection.deselect();
+          app.activeDocument.activeLayer = downLayer;
+          var shift = horizontalLine - Math.round(imageHeight/2);
+          app.activeDocument.activeLayer.translate(0,2*shift);
+      }
+      
+      if (${vv} > 50){
+        var horizontalLine = Math.round(imageHeight * (100 - ${vv}) / 100); 
+          var selectionBounds = [
+            [0, 0],
+            [0, horizontalLine],
+            [imageWidth,  horizontalLine],
+            [imageWidth, 0]
+          ];
+          app.activeDocument.selection.select(selectionBounds);
+          app.activeDocument.selection.clear();
+          app.activeDocument.selection.deselect();
+          var shift = Math.round(imageHeight/2) - horizontalLine;
+          app.activeDocument.activeLayer.translate(0, 2*shift);
+      }
+      
+      app.activeDocument.activeLayer = upLayer;
+      upLayer.merge(downLayer);
+
+      var bounds = [0, 0, imageWidth, imageHeight];
+      app.activeDocument.crop(bounds);
+      
+      var resultLayer = app.activeDocument.activeLayer;
+      resultLayer.name = "Reflect_T2B";
+      `;
+  }
+
+  function bottom2top(vv) {
+    return `
+      var activeLayer = app.activeDocument.activeLayer;
+      var duplicateLayer = activeLayer.duplicate();
+      duplicateLayer.name = "Down";
+      duplicateLayer.rasterize(RasterizeType.ENTIRELAYER);
+      var downCopyLayer = duplicateLayer.duplicate();
+      downCopyLayer.name = "Up";
+      var upLayer = app.activeDocument.layers.getByName("Up");
+      var downLayer = app.activeDocument.layers.getByName("Down");
+      
+      app.activeDocument.activeLayer = upLayer;
+      var idFlip = charIDToTypeID( "flip" );
+          var descFlip = new ActionDescriptor();
+          var idnull = charIDToTypeID( "null" );
+              var refFlip = new ActionReference();
+              var idLyr = charIDToTypeID( "Lyr " );
+              var idOrdn = charIDToTypeID( "Ordn" );
+              var idTrgt = charIDToTypeID( "Trgt" );
+              refFlip.putEnumerated( idLyr, idOrdn, idTrgt );
+          descFlip.putReference( idnull, refFlip );
+          var idAxis = charIDToTypeID( "Axis" );
+          var idOrnt = charIDToTypeID( "Ornt" );
+          var idVrtc = charIDToTypeID( "Vrtc" );
+          descFlip.putEnumerated( idAxis, idOrnt, idVrtc );
+      executeAction( idFlip, descFlip, DialogModes.NO );
+      
+      var imageWidth = app.activeDocument.width;
+      var imageHeight = app.activeDocument.height;
+            
+      if (${vv} > 50){
+          var horizontalLine = Math.round(imageHeight * ${vv} / 100); 
+          var selectionBounds = [
+            [0, imageHeight],
+            [0, horizontalLine],
+            [imageWidth,  horizontalLine],
+            [imageWidth, imageHeight]
+          ];
+          app.activeDocument.selection.select(selectionBounds);
+          app.activeDocument.selection.clear();
+          app.activeDocument.selection.deselect();
+          app.activeDocument.activeLayer = downLayer;
+          var shift = horizontalLine - Math.round(imageHeight/2);
+          app.activeDocument.activeLayer.translate(0,2*shift);
+      }
+      
+      if (${vv} <= 50){
+        var horizontalLine = Math.round(imageHeight * (100 - ${vv}) / 100); 
+          var selectionBounds = [
+            [0, imageHeight],
+            [0, horizontalLine],
+            [imageWidth,  horizontalLine],
+            [imageWidth, imageHeight]
+          ];
+          app.activeDocument.selection.select(selectionBounds);
+          app.activeDocument.selection.clear();
+          app.activeDocument.selection.deselect();
+          var shift = Math.round(imageHeight/2) - horizontalLine;
+          app.activeDocument.activeLayer.translate(0, 2*shift);
+      }
+      
+      app.activeDocument.activeLayer = upLayer;
+      upLayer.merge(downLayer);
+
+      var bounds = [0, 0, imageWidth, imageHeight];
+      app.activeDocument.crop(bounds);
+      
+      var resultLayer = app.activeDocument.activeLayer;
+      resultLayer.name = "Reflect_B2T";
+      `;
+  }
+
+  function Q1(hh, vv) {
+    var scriptStringConcat = right2left(hh);    
+    scriptStringConcat += top2bottom(vv);
+    scriptStringConcat += `
+    app.activeDocument.layers.getByName("Reflect_R2L").remove();
+    app.activeDocument.activeLayer = app.activeDocument.layers.getByName("Reflect_T2B");
+    app.activeDocument.layers.getByName("Reflect_T2B").name = "Reflect_Q1";   
+    `;
+    return scriptStringConcat;      
+  }
+
+  function Q2(hh, vv) {
+    var scriptStringConcat = left2right(hh);    
+    scriptStringConcat += top2bottom(vv);
+    scriptStringConcat += `
+    app.activeDocument.layers.getByName("Reflect_L2R").remove();
+    app.activeDocument.activeLayer = app.activeDocument.layers.getByName("Reflect_T2B");
+    app.activeDocument.layers.getByName("Reflect_T2B").name = "Reflect_Q2";   
+    `;
+    return scriptStringConcat;      
+  }
+
+  function Q3(hh, vv) {
+    var scriptStringConcat = left2right(hh);    
+    scriptStringConcat += bottom2top(vv);
+    scriptStringConcat += `
+    app.activeDocument.layers.getByName("Reflect_L2R").remove();
+    app.activeDocument.activeLayer = app.activeDocument.layers.getByName("Reflect_B2T");
+    app.activeDocument.layers.getByName("Reflect_B2T").name = "Reflect_Q3";   
+    `;
+    return scriptStringConcat;      
+  }
+
+   function Q4(hh, vv) {
+    var scriptStringConcat = right2left(hh);    
+    scriptStringConcat += bottom2top(vv);
+    scriptStringConcat += `
+    app.activeDocument.layers.getByName("Reflect_R2L").remove();
+    app.activeDocument.activeLayer = app.activeDocument.layers.getByName("Reflect_B2T");
+    app.activeDocument.layers.getByName("Reflect_B2T").name = "Reflect_Q4";   
+    `;
+    return scriptStringConcat;      
+  }
+
+  function lt2rb(dd) {
+    return `
+      function clamp(z, start, finish){
+        if (z<start)  z = start;
+        if (z>finish) z = finish;
+        return z;
+      }
+      
+      var activeLayer = app.activeDocument.activeLayer;
+      var duplicateLayer = activeLayer.duplicate();
+      duplicateLayer.name = "Down";
+      duplicateLayer.rasterize(RasterizeType.ENTIRELAYER);
+      var downCopyLayer = duplicateLayer.duplicate();
+      downCopyLayer.name = "Up";
+      var upLayer = app.activeDocument.layers.getByName("Up");
+      var downLayer = app.activeDocument.layers.getByName("Down");
+
+      var imageWidth = app.activeDocument.width;
+      var imageHeight = app.activeDocument.height;
+
+      if (${dd} >= 50){
+          app.activeDocument.activeLayer = downLayer;
+          var idFlip = charIDToTypeID( "flip" );
+              var descFlip = new ActionDescriptor();
+              var idnull = charIDToTypeID( "null" );
+                  var refFlip = new ActionReference();
+                  var idLyr = charIDToTypeID( "Lyr " );
+                  var idOrdn = charIDToTypeID( "Ordn" );
+                  var idTrgt = charIDToTypeID( "Trgt" );
+                  refFlip.putEnumerated( idLyr, idOrdn, idTrgt );
+              descFlip.putReference( idnull, refFlip );
+              var idAxis = charIDToTypeID( "Axis" );
+              var idOrnt = charIDToTypeID( "Ornt" );
+              var idHrzn = charIDToTypeID( "Hrzn" );
+              descFlip.putEnumerated( idAxis, idOrnt, idHrzn );
+          executeAction( idFlip, descFlip, DialogModes.NO );
+          
+          app.activeDocument.activeLayer.rotate(90);    
+         
+          var ratioW = 100*imageWidth/imageHeight;
+          var ratioH = 100*imageHeight/imageWidth;
+    
+          app.activeDocument.activeLayer.resize(ratioW, ratioH);
+
+          var xd = Math.round((2 * ${dd} - 100) * imageWidth / 100);
+          var yd = Math.round((2 * ${dd} - 100) * imageHeight / 100);
+
+          xd = clamp(xd, 0, imageWidth);
+          yd = clamp(yd, 0, imageHeight);
+
+          app.activeDocument.activeLayer = upLayer;
+          
+          var selectionBounds = [
+            [imageWidth, yd],
+            [xd, imageHeight],
+            [imageWidth, imageHeight]
+          ];
+          app.activeDocument.selection.select(selectionBounds);
+          app.activeDocument.selection.clear();
+          app.activeDocument.selection.deselect();  
+
+          app.activeDocument.activeLayer = downLayer;
+          app.activeDocument.activeLayer.translate(xd, yd);
+          
+      }
+
+      if (${dd} < 50){
+          app.activeDocument.activeLayer = upLayer;
+          var idFlip = charIDToTypeID( "flip" );
+              var descFlip = new ActionDescriptor();
+              var idnull = charIDToTypeID( "null" );
+                  var refFlip = new ActionReference();
+                  var idLyr = charIDToTypeID( "Lyr " );
+                  var idOrdn = charIDToTypeID( "Ordn" );
+                  var idTrgt = charIDToTypeID( "Trgt" );
+                  refFlip.putEnumerated( idLyr, idOrdn, idTrgt );
+              descFlip.putReference( idnull, refFlip );
+              var idAxis = charIDToTypeID( "Axis" );
+              var idOrnt = charIDToTypeID( "Ornt" );
+              var idHrzn = charIDToTypeID( "Hrzn" );
+              descFlip.putEnumerated( idAxis, idOrnt, idHrzn );
+          executeAction( idFlip, descFlip, DialogModes.NO );
+          
+          app.activeDocument.activeLayer.rotate(90);    
+         
+          var ratioW = 100*imageWidth/imageHeight;
+          var ratioH = 100*imageHeight/imageWidth;
+    
+          app.activeDocument.activeLayer.resize(ratioW, ratioH);
+
+          var xd = imageWidth -  Math.round((100 - 2 * ${dd}) * imageWidth / 100);
+          var yd = imageHeight - Math.round((100 - 2 * ${dd}) * imageHeight / 100);
+
+          xd = clamp(xd, 0, imageWidth);
+          yd = clamp(yd, 0, imageHeight);
+       
+          var selectionBounds = [
+            [0, yd],
+            [xd, 0],
+            [0, 0]
+          ];
+          app.activeDocument.selection.select(selectionBounds);
+          app.activeDocument.selection.clear();
+          app.activeDocument.selection.deselect();  
+
+          app.activeDocument.activeLayer = downLayer;
+          app.activeDocument.activeLayer.translate(-(imageWidth-xd), -(imageHeight-yd));
+          
+      }
+      
+      app.activeDocument.activeLayer = upLayer;
+      upLayer.merge(downLayer);
+
+      var bounds = [0, 0, imageWidth, imageHeight];
+      app.activeDocument.crop(bounds);
+      
+      var resultLayer = app.activeDocument.activeLayer;
+      resultLayer.name = "Reflect_LT2RB";      
+      `;
+  }
+
+  function rb2lt(dd) {
+    
+    dd = 100-dd;
+    
+    var scriptStringConcat = `app.activeDocument.rotateCanvas(180);`;     
+    scriptStringConcat += lt2rb(dd);
+    scriptStringConcat += `
+    app.activeDocument.rotateCanvas(180);
+    app.activeDocument.activeLayer = app.activeDocument.layers.getByName("Reflect_LT2RB");
+    app.activeDocument.layers.getByName("Reflect_LT2RB").name = "Reflect_RB2LT";   
+    `;
+    return scriptStringConcat;      
+  }
+
+  function lb2rt(dd) {
+    
+    dd = 100-dd;
+    
+    var scriptStringConcat = `
+    var idFlip = charIDToTypeID( "flip" );
+          var descFlip = new ActionDescriptor();
+          var idnull = charIDToTypeID( "null" );
+              var refFlip = new ActionReference();
+              var idDcmn = charIDToTypeID( "Dcmn" );
+              var idOrdn = charIDToTypeID( "Ordn" );
+              var idFrst = charIDToTypeID( "Frst" );
+              refFlip.putEnumerated( idDcmn, idOrdn, idFrst );
+          descFlip.putReference( idnull, refFlip );
+          var idAxis = charIDToTypeID( "Axis" );
+          var idOrnt = charIDToTypeID( "Ornt" );
+          var idVrtc = charIDToTypeID( "Hrzn" );
+          descFlip.putEnumerated( idAxis, idOrnt, idVrtc );
+    executeAction( idFlip, descFlip, DialogModes.NO );
+    `;     
+    scriptStringConcat += rb2lt(dd);
+    scriptStringConcat += `
+    var idFlip = charIDToTypeID( "flip" );
+          var descFlip = new ActionDescriptor();
+          var idnull = charIDToTypeID( "null" );
+              var refFlip = new ActionReference();
+              var idDcmn = charIDToTypeID( "Dcmn" );
+              var idOrdn = charIDToTypeID( "Ordn" );
+              var idFrst = charIDToTypeID( "Frst" );
+              refFlip.putEnumerated( idDcmn, idOrdn, idFrst );
+          descFlip.putReference( idnull, refFlip );
+          var idAxis = charIDToTypeID( "Axis" );
+          var idOrnt = charIDToTypeID( "Ornt" );
+          var idVrtc = charIDToTypeID( "Hrzn" );
+          descFlip.putEnumerated( idAxis, idOrnt, idVrtc );
+    executeAction( idFlip, descFlip, DialogModes.NO );
+    app.activeDocument.activeLayer = app.activeDocument.layers.getByName("Reflect_RB2LT");
+    app.activeDocument.layers.getByName("Reflect_RB2LT").name = "Reflect_LB2RT";   
+    `;
+    return scriptStringConcat;      
+  }
+
+  function rt2lb(dd) {
+    
+    dd = 100-dd;
+    
+    var scriptStringConcat = `
+    var idFlip = charIDToTypeID( "flip" );
+          var descFlip = new ActionDescriptor();
+          var idnull = charIDToTypeID( "null" );
+              var refFlip = new ActionReference();
+              var idDcmn = charIDToTypeID( "Dcmn" );
+              var idOrdn = charIDToTypeID( "Ordn" );
+              var idFrst = charIDToTypeID( "Frst" );
+              refFlip.putEnumerated( idDcmn, idOrdn, idFrst );
+          descFlip.putReference( idnull, refFlip );
+          var idAxis = charIDToTypeID( "Axis" );
+          var idOrnt = charIDToTypeID( "Ornt" );
+          var idVrtc = charIDToTypeID( "Hrzn" );
+          descFlip.putEnumerated( idAxis, idOrnt, idVrtc );
+    executeAction( idFlip, descFlip, DialogModes.NO );
+    `;     
+    scriptStringConcat += lt2rb(dd);
+    scriptStringConcat += `
+    var idFlip = charIDToTypeID( "flip" );
+          var descFlip = new ActionDescriptor();
+          var idnull = charIDToTypeID( "null" );
+              var refFlip = new ActionReference();
+              var idDcmn = charIDToTypeID( "Dcmn" );
+              var idOrdn = charIDToTypeID( "Ordn" );
+              var idFrst = charIDToTypeID( "Frst" );
+              refFlip.putEnumerated( idDcmn, idOrdn, idFrst );
+          descFlip.putReference( idnull, refFlip );
+          var idAxis = charIDToTypeID( "Axis" );
+          var idOrnt = charIDToTypeID( "Ornt" );
+          var idVrtc = charIDToTypeID( "Hrzn" );
+          descFlip.putEnumerated( idAxis, idOrnt, idVrtc );
+    executeAction( idFlip, descFlip, DialogModes.NO );
+    app.activeDocument.activeLayer = app.activeDocument.layers.getByName("Reflect_LT2RB");
+    app.activeDocument.layers.getByName("Reflect_LT2RB").name = "Reflect_RT2LB";   
+    `;
+    return scriptStringConcat;      
+  }
+
+  function applyRF(){
+
+    var indi = document.getElementById("indi");
+    var working = document.getElementById("working");
+    var runTime = document.getElementById("runtime");
+
+    working.style.visibility = "visible";
+    indi.style.visibility = "hidden"; 
+    
+     //Read parameters
+    var form = document.getElementById("RF");
+    var typeRF          = form.elements.typeValue.value;         
+    var hh              = Number(form.elements.hValue.value);
+    var vv              = Number(form.elements.vValue.value);
+    var dd              = Number(form.elements.dValue.value); 
+
+    var scriptString = "";
+    if        (typeRF == "L2R"){
+        scriptString = left2right(hh);  
+    } else if (typeRF == "R2L"){
+        scriptString = right2left(hh);  
+    } else if (typeRF == "T2B"){
+        scriptString = top2bottom(vv);  
+    } else if (typeRF == "B2T"){
+        scriptString = bottom2top(vv);  
+    } else if (typeRF == "Q1"){
+        scriptString = Q1(hh, vv);  
+    } else if (typeRF == "Q2"){
+        scriptString = Q2(hh, vv);  
+    } else if (typeRF == "Q3"){
+        scriptString = Q3(hh, vv);  
+    } else if (typeRF == "Q4"){
+        scriptString = Q4(hh, vv);  
+    } else if (typeRF == "LT2RB"){
+        scriptString = lt2rb(dd);  
+    } else if (typeRF == "RB2LT"){
+        scriptString = rb2lt(dd);  
+    } else if (typeRF == "LB2RT"){
+        scriptString = lb2rt(dd);  
+    } else if (typeRF == "RT2LB"){
+        scriptString = rt2lb(dd);  
+    }
+    //console.log(scriptString);
+
+    window.addEventListener("message", onMessage); 
+    
+    function onMessage(e) {
+        if (e.data == "done") {
+          var endTime = new Date();
+          var duration = endTime - startTime;
+        
+          runTime.innerHTML = duration;
+          working.style.visibility = "hidden";
+          indi.style.visibility = "visible";            
+        } 
+    }
+
+    var startTime = new Date();
+    window.parent.postMessage(scriptString, "*");
+           
+  }
+  </script>  
+</body>
+</html>
